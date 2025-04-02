@@ -1,16 +1,20 @@
 # Documentação da API de Login
 
-Esta API foi desenvolvida utilizando Flask e fornece funcionalidades para cadastro de usuários e listagem de usuários cadastrados. Abaixo estão descritos os endpoints disponíveis, suas funcionalidades e os formatos de requisição e resposta.
+Esta API foi desenvolvida utilizando o framework Flask e fornece funcionalidades básicas de autenticação e gerenciamento de usuários. Abaixo estão descritas as rotas disponíveis, os métodos HTTP suportados e os detalhes de cada funcionalidade.
 
----
+## Configuração
 
-## Endpoints
+A aplicação utiliza as seguintes configurações:
+- **SECRET_KEY**: Chave secreta para segurança da aplicação.
+- **SQLALCHEMY_DATABASE_URI**: URI do banco de dados SQLite utilizado.
+- **SQLALCHEMY_TRACK_MODIFICATIONS**: Desabilitado para evitar overhead desnecessário.
+
+## Rotas Disponíveis
 
 ### 1. Cadastro de Usuário
-
 **Rota:** `/cadastro`  
-**Método:** `POST`  
-**Descrição:** Permite cadastrar um novo usuário no sistema.  
+**Método HTTP:** `POST`  
+**Descrição:** Permite o cadastro de um novo usuário no sistema.  
 **Requisição:**  
 O corpo da requisição deve ser enviado no formato JSON com os seguintes campos obrigatórios:
 from flask import Flask, request, jsonify
