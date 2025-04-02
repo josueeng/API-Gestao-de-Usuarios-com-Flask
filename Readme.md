@@ -1,15 +1,18 @@
-# Documentação da API
+# Documentação da API de Login
 
-## Visão Geral
-Esta API foi construída usando Flask e fornece endpoints para registro de usuários e listagem de usuários registrados. Ela utiliza SQLAlchemy para gerenciamento de banco de dados e Bcrypt para hashing de senhas.
+Esta API foi desenvolvida utilizando Flask e fornece funcionalidades para cadastro de usuários e listagem de usuários cadastrados. Abaixo estão descritos os endpoints disponíveis, suas funcionalidades e os formatos de requisição e resposta.
+
+---
 
 ## Endpoints
 
-### 1. **POST /cadastro**
-Registra um novo usuário no sistema.
+### 1. Cadastro de Usuário
 
-#### Corpo da Requisição (JSON)
-```python
+**Rota:** `/cadastro`  
+**Método:** `POST`  
+**Descrição:** Permite cadastrar um novo usuário no sistema.  
+**Requisição:**  
+O corpo da requisição deve ser enviado no formato JSON com os seguintes campos obrigatórios:
 from flask import Flask, request, jsonify
 from config import config  # Corrigido o nome do módulo para 'config' em minúsculo, compatível com o padrão do Python.
 from Models import db, bcrypt, User  # Certifique-se de que 'Models.py' está correto.
@@ -82,4 +85,3 @@ class User(db.Model):  # Certifique-se de que 'User' está com a capitalização
 
     def verificar_senha(self, senha):
         return bcrypt.check_password_hash(self.senha_hash, senha)
-```
