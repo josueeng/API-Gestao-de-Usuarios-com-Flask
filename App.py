@@ -1,20 +1,23 @@
-from flask import Flask, request, jsonify
-from config import config  # Corrigido o nome do módulo para 'config' em minúsculo, compatível com o padrão do Python.
-from Models import db, bcrypt, User  # Certifique-se de que 'Models.py' está correto.
+from flask import Flask, request, jsonify, session
+from flask_cors import CORS  # Importação correta do CORS
+from config import config
+from Models import db, bcrypt, User
 
-app = Flask(__name__)  # Cria uma instância do Flask, que é o aplicativo web.
-app.config.from_object(config)  # Carrega as configurações a partir da classe 'config'.
+app = Flask(__name__)
+app.config.from_object(config)
+app.secret_key = 'supersecretkey'  # Adicione uma chave secreta para sessões
 
-db.init_app(app)  # Inicializa o banco de dados com a instância do Flask.
-bcrypt.init_app(app)  # Inicializa o Bcrypt com a instância do Flask.
+CORS(app)  # Habilita CORS para todas as rotas
 
-# Certifique-se de criar todas as tabelas no banco de dados ao inicializar a aplicação
+db.init_app(app)
+bcrypt.init_app(app)
+
 with app.app_context():
     db.create_all()
 
 @app.route('/cadastro', methods=['POST'])
 def cadastro():
-    data = request.get_json()  # Obtém os dados enviados no corpo da requisição no formato JSON.
+    data = request.get_json()
     nome = data.get('nome')
     email = data.get('email')
     senha = data.get('senha')
@@ -22,7 +25,7 @@ def cadastro():
     if not nome or not email or not senha:
         return jsonify({'error': 'Todos os campos são obrigatórios'}), 400
 
-    if User.query.filter_by(email=email).first():  # Corrigido o nome para 'User' (classe definida em Models).
+    if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email já cadastrado'}), 400
 
     novo_usuario = User(nome=nome, email=email)
@@ -32,14 +35,33 @@ def cadastro():
 
     return jsonify({'message': 'Usuário cadastrado com sucesso'}), 201
 
-@app.route('/usuarios', methods=['GET'])
-def listar_usuarios():
-    usuarios = User.query.all()  # Corrigido para usar 'User' (classe definida em Models).
-    usuarios_list = [
-        {'id': usuario.id, 'nome': usuario.nome, 'email': usuario.email}
-        for usuario in usuarios
-    ]
-    return jsonify(usuarios_list), 200
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get('email')
+    senha = data.get('senha')
+
+    usuario = User.query.filter_by(email=email).first()
+    if usuario and usuario.check_senha(senha):
+        session['user_id'] = usuario.id
+        session['user_name'] = usuario.nome
+        return jsonify({'message': 'Login bem-sucedido'}), 200
+    return jsonify({'error': 'Credenciais inválidas'}), 401
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.pop('user_id', None)
+    session.pop('user_name', None)
+    return jsonify({'message': 'Logout bem-sucedido'}), 200
+
+@app.route('/usuario', methods=['GET'])
+def get_usuario():
+    user_id = session.get('user_id')
+    if user_id:
+        usuario = User.query.get(user_id)
+        return jsonify({'id': usuario.id, 'nome': usuario.nome, 'email': usuario.email}), 200
+    return jsonify({'error': 'Usuário não logado'}), 401
 
 if __name__ == '__main__':
-    app.run(debug=True)  # Inicia o servidor Flask em modo de depuração.
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
