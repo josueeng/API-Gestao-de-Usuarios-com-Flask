@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, session
 from flask_cors import CORS  # Importação correta do CORS
 from config import config
 from Models import db, bcrypt, User
-
+import os
 app = Flask(__name__)
 app.config.from_object(config)
 app.secret_key = 'supersecretkey'  # Adicione uma chave secreta para sessões
